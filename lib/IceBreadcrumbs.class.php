@@ -2,6 +2,7 @@
 
 class IceBreadcrumbsItem
 {
+
   protected $text;
   protected $uri;
   protected $title;
@@ -17,9 +18,9 @@ class IceBreadcrumbsItem
    */
   public function __construct($text, $uri = null, $title = null)
   {
-    $this->text   = (string) $text;
-    $this->uri    = (string) $uri;
-    $this->title  = (string) $title;
+    $this->text  = (string)$text;
+    $this->uri   = (string)$uri;
+    $this->title = (string)$title;
   }
 
   /**
@@ -27,7 +28,7 @@ class IceBreadcrumbsItem
    */
   public function __toString()
   {
-    return (string) $this->text;
+    return (string)$this->text;
   }
 
   /**
@@ -57,7 +58,7 @@ class IceBreadcrumbsItem
    */
   public function setText($v)
   {
-    $this->text = (string) $v;
+    $this->text = (string)$v;
   }
 
   /**
@@ -77,28 +78,43 @@ class IceBreadcrumbsItem
    */
   public function setTitle($v)
   {
-    $this->title = (string) $v;
+    $this->title = (string)$v;
   }
 }
 
 class IceBreadcrumbs
 {
+
   /**
    * @var IceBreadcrumbs
    */
-  static protected $instance  = null;
+  static protected $instance = null;
 
   protected
-    $items     = array(),
-    $is_full   = false,
-    $read_only = false;
+      $items = array(),
+      $is_full = false,
+      $read_only = false,
+    /* @var $context sfContext */
+      $context = null;
 
   /**
    * Constructor
+   *
+   * @param string $title
+   * @param string $route
    */
-  public function __construct()
+  public function __construct($title = null, $route = null)
   {
-    $this->setRoot('<span class="sprites home">&nbsp;</span>', '@homepage');
+    if (is_null($title))
+    {
+      $title = '<span class="sprites home">&nbsp;</span>';
+    }
+    if (is_null($route))
+    {
+      $route = '@homepage';
+    }
+
+    $this->setRoot($title, $route);
   }
 
   /**
@@ -115,7 +131,7 @@ class IceBreadcrumbs
     if ($this->read_only !== true && $this->is_full !== true)
     {
       $this->items[] = new IceBreadcrumbsItem($text, $uri, $title);
-      $this->items = array_unique($this->items);
+      $this->items   = array_unique($this->items);
 
       $this->save();
     }
@@ -141,16 +157,18 @@ class IceBreadcrumbs
   /**
    * Get the unique IceBreadcrumbs instance (singleton)
    *
+   * @param \sfContext $context
    * @return \IceBreadcrumbs
    */
-  public static function getInstance()
+  public static function getInstance(sfContext $context)
   {
     if (self::$instance === null)
     {
-      if (!self::$instance = sfContext::getInstance()->getRequest()->getParameter('IceBreadcrumbs'))
+      if (!self::$instance = $context->getRequest()->getParameter('IceBreadcrumbs'))
       {
         self::$instance = new IceBreadcrumbs();
         self::$instance->save();
+        self::$instance->context = $context;
       }
     }
 
@@ -185,6 +203,14 @@ class IceBreadcrumbs
    */
   protected function save()
   {
-    sfContext::getInstance()->getRequest()->setParameter('IceBreadcrumbs', $this);
+    $this->getContext()->getRequest()->setParameter('IceBreadcrumbs', $this);
+  }
+
+  /**
+   * @return sfContext|null
+   */
+  public function getContext()
+  {
+    return $this->context;
   }
 }
