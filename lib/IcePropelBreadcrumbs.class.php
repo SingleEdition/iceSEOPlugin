@@ -64,7 +64,7 @@ class IcePropelBreadcrumbs
       $name       = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
       $breadcrumb = array(
         'name'  => $name,
-        'url'   => $routing->generate($item['route'], $route_object),
+        'url'   => isset($item['route']) ? $routing->generate($item['route'], $route_object) : null,
         'title' => !empty($item['title']) ? $item['title'] : $name,
       );
     }

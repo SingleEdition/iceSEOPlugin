@@ -1,9 +1,10 @@
 <?php
 
 /** @var $breadcrumbs array */
+$breadcrumbsCount = count($breadcrumbs);
 foreach ($breadcrumbs as $key => $breadcrumb)
 {
-  if ($breadcrumb['url'] != null)
+  if (!is_null($breadcrumb['url']))
   {
     echo link_to($breadcrumb['name'], $breadcrumb['url'], array('title'=> $breadcrumb['title']));
   }
@@ -12,7 +13,7 @@ foreach ($breadcrumbs as $key => $breadcrumb)
     echo $breadcrumb['name'];
   }
 
-  if ($key < count($breadcrumbs) - 1)
+  if ($key < $breadcrumbsCount - 1)
   {
     /** @var $separator string */
     echo $separator;
