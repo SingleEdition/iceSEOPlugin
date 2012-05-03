@@ -24,6 +24,7 @@
  * @since 5/2/12
  * Id: $Id$
  */
+require_once dirname(__FILE__) . '/../lib/BaseiceBreadcrumbsModuleComponents.class.php';
 
 class iceBreadcrumbsModuleComponents extends BaseiceBreadcrumbsModuleComponents
 {
