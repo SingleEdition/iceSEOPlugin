@@ -45,7 +45,7 @@ class IcePropelBreadcrumbs
   protected function buildBreadcrumb($item)
   {
     $request = sfContext::getInstance()->getRequest();
-    $routing = sfContext::getInstance()->getRouting();
+    $controller = sfContext::getInstance()->getController();
 
     if (isset($item['model']) && $item['model'] == true)
     {
@@ -64,13 +64,13 @@ class IcePropelBreadcrumbs
       $name       = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
       $breadcrumb = array(
         'name'  => $name,
-        'url'   => isset($item['route']) ? $routing->generate($item['route'], $route_object) : null,
+        'url'   => isset($item['route']) ? $controller->genUrl($item['route'], $route_object) : null,
         'title' => !empty($item['title']) ? $item['title'] : $name,
       );
     }
     else
     {
-      $url        = isset($item['route']) ? $routing->generate($item['route']) : null;
+      $url        = isset($item['route']) ? $controller->genUrl($item['route']) : null;
       $breadcrumb = array(
         'name'  => $item['name'],
         'url'   => $url,
