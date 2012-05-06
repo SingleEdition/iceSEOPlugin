@@ -47,7 +47,7 @@ class IcePropelBreadcrumbs
     $request = sfContext::getInstance()->getRequest();
     $controller = sfContext::getInstance()->getController();
 
-    if (isset($item['model']) && $item['model'] == true)
+    if (isset($item['model']) && (boolean) $item['model'] === true)
     {
       $object = $request->getAttribute('sf_route')->getObject();
 
@@ -61,16 +61,19 @@ class IcePropelBreadcrumbs
         $route_object = $object;
       }
 
-      $name       = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
+      $name = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
+      $url  = !empty($item['route']) ?
+        $controller->genUrl(array('sf_route' => $item['route'], 'sf_subject' => $route_object)) :
+        null;
+
       $breadcrumb = array(
-        'name'  => $name,
-        'url'   => isset($item['route']) ? $controller->genUrl($item['route'], $route_object) : null,
+        'name' => $name, 'url' => $url,
         'title' => !empty($item['title']) ? $item['title'] : $name,
       );
     }
     else
     {
-      $url        = isset($item['route']) ? $controller->genUrl($item['route']) : null;
+      $url = isset($item['route']) ? $controller->genUrl($item['route']) : null;
       $breadcrumb = array(
         'name'  => $item['name'],
         'url'   => $url,
@@ -78,8 +81,7 @@ class IcePropelBreadcrumbs
       );
     }
 
-    $case               = $this->getCaseForItem($item);
-    $breadcrumb['name'] = $this->switchCase($breadcrumb['name'], $case);
+    $breadcrumb['name'] = $this->switchCase($breadcrumb['name'], $this->getCaseForItem($item));
 
     return $breadcrumb;
   }
