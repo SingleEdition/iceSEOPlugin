@@ -1,0 +1,9 @@
+config/breadcrumbs.yml:
+  class: sfSimpleYamlConfigHandler
+  param:
+    prefix: ice_breadcrumbs_
+
+#modules/*/config/breadcrumbs.yml:
+#  class: sfDefineEnvironmentConfigHandler
+#  param:
+#    prefix: ice_breadcrumbs_

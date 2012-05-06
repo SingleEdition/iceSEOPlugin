@@ -21,11 +21,12 @@ class IcePropelBreadcrumbs
   {
     if ($this->config == null)
     {
-      $file = sfConfig::get('sf_app_config_dir') . '/breadcrumbs.yml';
-      $yml  = sfYamlConfigHandler::parseYaml($file);
-      sfConfig::add($yml);
+      if ($file = sfContext::getInstance()->getConfigCache()->checkConfig('config/breadcrumbs.yml', true))
+      {
+        sfConfig::add(include($file));
+      }
 
-      $this->config = sfConfig::get('ice_propel_breadcrumbs');
+      $this->config = sfConfig::get('ice_breadcrumbs');
     }
 
     return $this->config;
