@@ -20,9 +20,6 @@ abstract class BaseiceModelMetaTagI18nPeer
   /** the related Propel class for this table */
   const OM_CLASS = 'iceModelMetaTagI18n';
 
-  /** A class that can be returned by this peer. */
-  const CLASS_DEFAULT = 'plugins.iceSEOPlugin.lib.model.iceModelMetaTagI18n';
-
   /** the related TableMap class for this table */
   const TM_CLASS = 'iceModelMetaTagI18nTableMap';
 
@@ -449,7 +446,7 @@ abstract class BaseiceModelMetaTagI18nPeer
     $results = array();
   
     // set the class once to avoid overhead in the loop
-    $cls = iceModelMetaTagI18nPeer::getOMClass(false);
+    $cls = iceModelMetaTagI18nPeer::getOMClass();
     // populate the object(s)
     while ($row = $stmt->fetch(PDO::FETCH_NUM))
     {
@@ -610,7 +607,7 @@ abstract class BaseiceModelMetaTagI18nPeer
       else
       {
 
-        $cls = iceModelMetaTagI18nPeer::getOMClass(false);
+        $cls = iceModelMetaTagI18nPeer::getOMClass();
 
         $obj1 = new $cls();
         $obj1->hydrate($row);
@@ -624,7 +621,7 @@ abstract class BaseiceModelMetaTagI18nPeer
         if (!$obj2)
         {
 
-          $cls = iceModelMetaTagPeer::getOMClass(false);
+          $cls = iceModelMetaTagPeer::getOMClass();
 
           $obj2 = new $cls();
           $obj2->hydrate($row, $startcol);
@@ -752,7 +749,7 @@ abstract class BaseiceModelMetaTagI18nPeer
       }
       else
       {
-        $cls = iceModelMetaTagI18nPeer::getOMClass(false);
+        $cls = iceModelMetaTagI18nPeer::getOMClass();
 
         $obj1 = new $cls();
         $obj1->hydrate($row);
@@ -768,7 +765,7 @@ abstract class BaseiceModelMetaTagI18nPeer
         if (!$obj2)
         {
 
-          $cls = iceModelMetaTagPeer::getOMClass(false);
+          $cls = iceModelMetaTagPeer::getOMClass();
 
           $obj2 = new $cls();
           $obj2->hydrate($row, $startcol2);
@@ -812,17 +809,12 @@ abstract class BaseiceModelMetaTagI18nPeer
   /**
    * The class that the Peer will make instances of.
    *
-   * If $withPrefix is true, the returned path
-   * uses a dot-path notation which is tranalted into a path
-   * relative to a location on the PHP include_path.
-   * (e.g. path.to.MyClass -> 'path/to/MyClass.php')
    *
-   * @param      boolean $withPrefix Whether or not to return the path with the class name
-   * @return     string path.to.ClassName
+   * @return     string ClassName
    */
-  public static function getOMClass($withPrefix = true)
+  public static function getOMClass()
   {
-    return $withPrefix ? iceModelMetaTagI18nPeer::CLASS_DEFAULT : iceModelMetaTagI18nPeer::OM_CLASS;
+    return iceModelMetaTagI18nPeer::OM_CLASS;
   }
 
   /**

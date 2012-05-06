@@ -25,6 +25,12 @@ abstract class BaseiceModelMetaTagI18n extends BaseObject  implements Persistent
   protected static $peer;
 
   /**
+   * The flag var to prevent infinit loop in deep copy
+   * @var       boolean
+   */
+  protected $startCopy = false;
+
+  /**
    * The value for the id field.
    * @var        int
    */
@@ -416,7 +422,7 @@ abstract class BaseiceModelMetaTagI18n extends BaseObject  implements Persistent
         $con->commit();
       }
     }
-    catch (PropelException $e)
+    catch (Exception $e)
     {
       $con->rollBack();
       throw $e;
@@ -498,7 +504,7 @@ abstract class BaseiceModelMetaTagI18n extends BaseObject  implements Persistent
       $con->commit();
       return $affectedRows;
     }
-    catch (PropelException $e)
+    catch (Exception $e)
     {
       $con->rollBack();
       throw $e;
@@ -537,29 +543,116 @@ abstract class BaseiceModelMetaTagI18n extends BaseObject  implements Persistent
         $this->seticeModelMetaTag($this->aiceModelMetaTag);
       }
 
-
-      // If this object has been modified, then save it to the database.
-      if ($this->isModified())
+      if ($this->isNew() || $this->isModified())
       {
+        // persist changes
         if ($this->isNew())
         {
-          $criteria = $this->buildCriteria();
-          $pk = BasePeer::doInsert($criteria, $con);
-          $affectedRows += 1;
-          $this->setNew(false);
+          $this->doInsert($con);
         }
         else
         {
-          $affectedRows += iceModelMetaTagI18nPeer::doUpdate($this, $con);
+          $this->doUpdate($con);
         }
-
-        $this->resetModified(); // [HL] After being saved an object is no longer 'modified'
+        $affectedRows += 1;
+        $this->resetModified();
       }
 
       $this->alreadyInSave = false;
 
     }
     return $affectedRows;
+  }
+
+  /**
+   * Insert the row in the database.
+   *
+   * @param      PropelPDO $con
+   *
+   * @throws     PropelException
+   * @see        doSave()
+   */
+  protected function doInsert(PropelPDO $con)
+  {
+    $modifiedColumns = array();
+    $index = 0;
+
+
+     // check the columns in natural order for more readable SQL queries
+    if ($this->isColumnModified(iceModelMetaTagI18nPeer::ID))
+    {
+      $modifiedColumns[':p' . $index++]  = '`ID`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagI18nPeer::TITLE))
+    {
+      $modifiedColumns[':p' . $index++]  = '`TITLE`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagI18nPeer::DESCRIPTION))
+    {
+      $modifiedColumns[':p' . $index++]  = '`DESCRIPTION`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagI18nPeer::KEYWORDS))
+    {
+      $modifiedColumns[':p' . $index++]  = '`KEYWORDS`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagI18nPeer::CULTURE))
+    {
+      $modifiedColumns[':p' . $index++]  = '`CULTURE`';
+    }
+
+    $sql = sprintf(
+      'INSERT INTO `meta_tag_i18n` (%s) VALUES (%s)',
+      implode(', ', $modifiedColumns),
+      implode(', ', array_keys($modifiedColumns))
+    );
+
+    try
+    {
+      $stmt = $con->prepare($sql);
+      foreach ($modifiedColumns as $identifier => $columnName)
+      {
+        switch ($columnName)
+        {
+          case '`ID`':
+            $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
+            break;
+          case '`TITLE`':
+            $stmt->bindValue($identifier, $this->title, PDO::PARAM_STR);
+            break;
+          case '`DESCRIPTION`':
+            $stmt->bindValue($identifier, $this->description, PDO::PARAM_STR);
+            break;
+          case '`KEYWORDS`':
+            $stmt->bindValue($identifier, $this->keywords, PDO::PARAM_STR);
+            break;
+          case '`CULTURE`':
+            $stmt->bindValue($identifier, $this->culture, PDO::PARAM_STR);
+            break;
+        }
+      }
+      $stmt->execute();
+    }
+    catch (Exception $e)
+    {
+      Propel::log($e->getMessage(), Propel::LOG_ERR);
+      throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), $e);
+    }
+
+    $this->setNew(false);
+  }
+
+  /**
+   * Update the row in the database.
+   *
+   * @param      PropelPDO $con
+   *
+   * @see        doSave()
+   */
+  protected function doUpdate(PropelPDO $con)
+  {
+    $selectCriteria = $this->buildPkeyCriteria();
+    $valuesCriteria = $this->buildCriteria();
+    BasePeer::doUpdate($selectCriteria, $valuesCriteria, $con);
   }
 
   /**
@@ -903,6 +996,19 @@ abstract class BaseiceModelMetaTagI18n extends BaseObject  implements Persistent
     $copyObj->setDescription($this->getDescription());
     $copyObj->setKeywords($this->getKeywords());
     $copyObj->setCulture($this->getCulture());
+
+    if ($deepCopy && !$this->startCopy)
+    {
+      // important: temporarily setNew(false) because this affects the behavior of
+      // the getter/setter methods for fkey referrer objects.
+      $copyObj->setNew(false);
+      // store object hash to prevent cycle
+      $this->startCopy = true;
+
+      //unflag object copy
+      $this->startCopy = false;
+    }
+
     if ($makeNew)
     {
       $copyObj->setNew(true);

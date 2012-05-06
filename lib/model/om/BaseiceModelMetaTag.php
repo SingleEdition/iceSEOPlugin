@@ -25,6 +25,12 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
   protected static $peer;
 
   /**
+   * The flag var to prevent infinit loop in deep copy
+   * @var       boolean
+   */
+  protected $startCopy = false;
+
+  /**
    * The value for the id field.
    * @var        int
    */
@@ -84,6 +90,12 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
    * @var array Current I18N objects
    */
   protected $current_i18n = array();
+
+  /**
+   * An array of objects scheduled for deletion.
+   * @var    array
+   */
+  protected $iceModelMetaTagI18nsScheduledForDeletion = null;
 
   /**
    * Get the [id] column value.
@@ -504,7 +516,7 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
         $con->commit();
       }
     }
-    catch (PropelException $e)
+    catch (Exception $e)
     {
       $con->rollBack();
       throw $e;
@@ -597,7 +609,7 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
       $con->commit();
       return $affectedRows;
     }
-    catch (PropelException $e)
+    catch (Exception $e)
     {
       $con->rollBack();
       throw $e;
@@ -622,33 +634,30 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
     {
       $this->alreadyInSave = true;
 
-      if ($this->isNew() )
+      if ($this->isNew() || $this->isModified())
       {
-        $this->modifiedColumns[] = iceModelMetaTagPeer::ID;
-      }
-
-      // If this object has been modified, then save it to the database.
-      if ($this->isModified())
-      {
+        // persist changes
         if ($this->isNew())
         {
-          $criteria = $this->buildCriteria();
-          if ($criteria->keyContainsValue(iceModelMetaTagPeer::ID) )
-          {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.iceModelMetaTagPeer::ID.')');
-          }
-
-          $pk = BasePeer::doInsert($criteria, $con);
-          $affectedRows = 1;
-          $this->setId($pk);  //[IMV] update autoincrement primary key
-          $this->setNew(false);
+          $this->doInsert($con);
         }
         else
         {
-          $affectedRows = iceModelMetaTagPeer::doUpdate($this, $con);
+          $this->doUpdate($con);
         }
+        $affectedRows += 1;
+        $this->resetModified();
+      }
 
-        $this->resetModified(); // [HL] After being saved an object is no longer 'modified'
+      if ($this->iceModelMetaTagI18nsScheduledForDeletion !== null)
+      {
+        if (!$this->iceModelMetaTagI18nsScheduledForDeletion->isEmpty())
+        {
+          iceModelMetaTagI18nQuery::create()
+            ->filterByPrimaryKeys($this->iceModelMetaTagI18nsScheduledForDeletion->getPrimaryKeys(false))
+            ->delete($con);
+          $this->iceModelMetaTagI18nsScheduledForDeletion = null;
+        }
       }
 
       if ($this->colliceModelMetaTagI18ns !== null)
@@ -667,6 +676,112 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
 
     }
     return $affectedRows;
+  }
+
+  /**
+   * Insert the row in the database.
+   *
+   * @param      PropelPDO $con
+   *
+   * @throws     PropelException
+   * @see        doSave()
+   */
+  protected function doInsert(PropelPDO $con)
+  {
+    $modifiedColumns = array();
+    $index = 0;
+
+    $this->modifiedColumns[] = iceModelMetaTagPeer::ID;
+    if (null !== $this->id)
+    {
+      throw new PropelException('Cannot insert a value for auto-increment primary key (' . iceModelMetaTagPeer::ID . ')');
+    }
+
+     // check the columns in natural order for more readable SQL queries
+    if ($this->isColumnModified(iceModelMetaTagPeer::ID))
+    {
+      $modifiedColumns[':p' . $index++]  = '`ID`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagPeer::URL))
+    {
+      $modifiedColumns[':p' . $index++]  = '`URL`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagPeer::PARAMETERS))
+    {
+      $modifiedColumns[':p' . $index++]  = '`PARAMETERS`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagPeer::UPDATED_AT))
+    {
+      $modifiedColumns[':p' . $index++]  = '`UPDATED_AT`';
+    }
+    if ($this->isColumnModified(iceModelMetaTagPeer::CREATED_AT))
+    {
+      $modifiedColumns[':p' . $index++]  = '`CREATED_AT`';
+    }
+
+    $sql = sprintf(
+      'INSERT INTO `meta_tag` (%s) VALUES (%s)',
+      implode(', ', $modifiedColumns),
+      implode(', ', array_keys($modifiedColumns))
+    );
+
+    try
+    {
+      $stmt = $con->prepare($sql);
+      foreach ($modifiedColumns as $identifier => $columnName)
+      {
+        switch ($columnName)
+        {
+          case '`ID`':
+            $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
+            break;
+          case '`URL`':
+            $stmt->bindValue($identifier, $this->url, PDO::PARAM_STR);
+            break;
+          case '`PARAMETERS`':
+            $stmt->bindValue($identifier, $this->parameters, PDO::PARAM_STR);
+            break;
+          case '`UPDATED_AT`':
+            $stmt->bindValue($identifier, $this->updated_at, PDO::PARAM_STR);
+            break;
+          case '`CREATED_AT`':
+            $stmt->bindValue($identifier, $this->created_at, PDO::PARAM_STR);
+            break;
+        }
+      }
+      $stmt->execute();
+    }
+    catch (Exception $e)
+    {
+      Propel::log($e->getMessage(), Propel::LOG_ERR);
+      throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), $e);
+    }
+
+    try
+    {
+      $pk = $con->lastInsertId();
+    }
+    catch (Exception $e)
+    {
+      throw new PropelException('Unable to get autoincrement id.', $e);
+    }
+    $this->setId($pk);
+
+    $this->setNew(false);
+  }
+
+  /**
+   * Update the row in the database.
+   *
+   * @param      PropelPDO $con
+   *
+   * @see        doSave()
+   */
+  protected function doUpdate(PropelPDO $con)
+  {
+    $selectCriteria = $this->buildPkeyCriteria();
+    $valuesCriteria = $this->buildCriteria();
+    BasePeer::doUpdate($selectCriteria, $valuesCriteria, $con);
   }
 
   /**
@@ -1001,11 +1116,13 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
     $copyObj->setUpdatedAt($this->getUpdatedAt());
     $copyObj->setCreatedAt($this->getCreatedAt());
 
-    if ($deepCopy)
+    if ($deepCopy && !$this->startCopy)
     {
       // important: temporarily setNew(false) because this affects the behavior of
       // the getter/setter methods for fkey referrer objects.
       $copyObj->setNew(false);
+      // store object hash to prevent cycle
+      $this->startCopy = true;
 
       foreach ($this->geticeModelMetaTagI18ns() as $relObj)
       {
@@ -1014,6 +1131,8 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
         }
       }
 
+      //unflag object copy
+      $this->startCopy = false;
     }
 
     if ($makeNew)
@@ -1154,6 +1273,32 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
   }
 
   /**
+   * Sets a collection of iceModelMetaTagI18n objects related by a one-to-many relationship
+   * to the current object.
+   * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+   * and new objects from the given Propel collection.
+   *
+   * @param      PropelCollection $iceModelMetaTagI18ns A Propel collection.
+   * @param      PropelPDO $con Optional connection object
+   */
+  public function seticeModelMetaTagI18ns(PropelCollection $iceModelMetaTagI18ns, PropelPDO $con = null)
+  {
+    $this->iceModelMetaTagI18nsScheduledForDeletion = $this->geticeModelMetaTagI18ns(new Criteria(), $con)->diff($iceModelMetaTagI18ns, false);
+
+    foreach ($iceModelMetaTagI18ns as $iceModelMetaTagI18n)
+    {
+      // Fix issue with collection modified by reference
+      if ($iceModelMetaTagI18n->isNew())
+      {
+        $iceModelMetaTagI18n->seticeModelMetaTag($this);
+      }
+      $this->addiceModelMetaTagI18n($iceModelMetaTagI18n);
+    }
+
+    $this->colliceModelMetaTagI18ns = $iceModelMetaTagI18ns;
+  }
+
+  /**
    * Returns the number of related iceModelMetaTagI18n objects.
    *
    * @param      Criteria $criteria
@@ -1202,11 +1347,19 @@ abstract class BaseiceModelMetaTag extends BaseObject  implements Persistent
       $this->initiceModelMetaTagI18ns();
     }
     if (!$this->colliceModelMetaTagI18ns->contains($l)) { // only add it if the **same** object is not already associated
-      $this->colliceModelMetaTagI18ns[]= $l;
-      $l->seticeModelMetaTag($this);
+      $this->doAddiceModelMetaTagI18n($l);
     }
 
     return $this;
+  }
+
+  /**
+   * @param  iceModelMetaTagI18n $iceModelMetaTagI18n The iceModelMetaTagI18n object to add.
+   */
+  protected function doAddiceModelMetaTagI18n($iceModelMetaTagI18n)
+  {
+    $this->colliceModelMetaTagI18ns[]= $iceModelMetaTagI18n;
+    $iceModelMetaTagI18n->seticeModelMetaTag($this);
   }
 
   /**
