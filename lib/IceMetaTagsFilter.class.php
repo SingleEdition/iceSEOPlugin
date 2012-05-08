@@ -56,4 +56,6 @@ class IceMetaTagsFilter extends sfFilter
     // Execute next filter
     $chain->execute();
   }
+
+
 }
