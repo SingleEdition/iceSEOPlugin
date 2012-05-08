@@ -108,6 +108,8 @@ class IceBreadcrumbs
    */
   public function __construct(sfContext $context, $title = null, $route = null)
   {
+    $this->context = $context;
+
     if (is_null($title))
     {
       $title = '<span class="sprites home">&nbsp;</span>';
@@ -118,7 +120,6 @@ class IceBreadcrumbs
     }
 
     $this->setRoot($title, $route);
-    $this->context = $context;
   }
 
   /**
