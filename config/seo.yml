@@ -1,0 +1,9 @@
+seo:
+  _config:
+    separator: ' - '
+    appendTitle: 'CollectorsQuest'
+
+#  collection:
+#    collectible:
+#      title: %Name%
+#      model: true
