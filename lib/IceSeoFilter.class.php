@@ -85,6 +85,10 @@ class IceSeoFilter extends sfFilter
 
       if ($title)
       {
+        if ($appendTitle)
+        {
+          $title .= $config['separator'] . $appendTitle;
+        }
         //There is SEO title set
         $response->addMeta('title', $title);
       }
