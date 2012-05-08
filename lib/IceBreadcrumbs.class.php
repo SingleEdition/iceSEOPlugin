@@ -90,20 +90,23 @@ class IceBreadcrumbs
    */
   static protected $instance = null;
 
-  protected
-      $items = array(),
-      $is_full = false,
-      $read_only = false,
-    /* @var $context sfContext */
-      $context = null;
+  /* @var $items IceBreadcrumbsItem[] */
+  protected $items = array();
+  protected $is_full = false;
+  protected $read_only = false;
+
+  /* @var $context sfContext */
+  private $context = null;
 
   /**
    * Constructor
    *
+   * @param sfContext $context
    * @param string $title
    * @param string $route
+   *
    */
-  public function __construct($title = null, $route = null)
+  public function __construct(sfContext $context, $title = null, $route = null)
   {
     if (is_null($title))
     {
@@ -115,6 +118,7 @@ class IceBreadcrumbs
     }
 
     $this->setRoot($title, $route);
+    $this->context = $context;
   }
 
   /**
@@ -125,6 +129,7 @@ class IceBreadcrumbs
    * @param string  $title
    * @param boolean $is_last
    *
+   * @return IceBreadcrumbs for fluid interface
    */
   public function addItem($text, $uri = null, $title = null, $is_last = false)
   {
@@ -140,10 +145,14 @@ class IceBreadcrumbs
     {
       $this->is_full = true;
     }
+
+    return $this;
   }
 
   /**
    * Delete all existings items
+   *
+   * @return IceBreadcrumbs for fluid interface
    */
   public function clearItems()
   {
@@ -152,6 +161,8 @@ class IceBreadcrumbs
       $this->items = array();
       $this->save();
     }
+
+    return $this;
   }
 
   /**
@@ -166,7 +177,7 @@ class IceBreadcrumbs
     {
       if (!self::$instance = $context->getRequest()->getParameter('IceBreadcrumbs'))
       {
-        self::$instance = new IceBreadcrumbs();
+        self::$instance = new IceBreadcrumbs($context);
         self::$instance->save();
         self::$instance->context = $context;
       }
@@ -179,7 +190,7 @@ class IceBreadcrumbs
    * Retrieve an array of IceBreadcrumbsItem
    *
    * @param  int $offset
-   * @return array
+   * @return IceBreadcrumbsItem[]
    */
   public function getItems($offset = 0)
   {
@@ -191,11 +202,14 @@ class IceBreadcrumbs
    *
    * @param string $text
    * @param string $uri
+   *
+   * @return IceBreadcrumbs for fluid interface
    */
   public function setRoot($text, $uri)
   {
     $this->items[0] = new IceBreadcrumbsItem($text, $uri);
     $this->save();
+
   }
 
   /**
@@ -207,7 +221,7 @@ class IceBreadcrumbs
   }
 
   /**
-   * @return sfContext|null
+   * @return sfContext
    */
   public function getContext()
   {
