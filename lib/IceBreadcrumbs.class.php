@@ -12,15 +12,15 @@ class IceBreadcrumbsItem
    *
    * @param string $text
    * @param string $uri
-   * @param string $title
+   * @param array $options
    *
    * @return \IceBreadcrumbsItem
    */
-  public function __construct($text, $uri = null, $title = null)
+  public function __construct($text, $uri = null, array $options = array())
   {
     $this->text  = (string)$text;
     $this->uri   = (string)$uri;
-    $this->title = (string)$title;
+    $this->title = isset($options['title']) ? $options['title'] : '';
   }
 
   /**
