@@ -32,7 +32,7 @@ class BaseiceBreadcrumbsModuleComponents extends sfComponents
     $module = $this->getContext()->getModuleName();
     $action = $this->getContext()->getActionName();
 
-    $ice_propel_breadcrumbs = new IcePropelBreadcrumbs($module, $action);
+    $ice_propel_breadcrumbs = new IcePropelBreadcrumbs($this->getContext(), $module, $action);
     $this->breadcrumbs      = $ice_propel_breadcrumbs->getBreadcrumbs();
     $this->separator        = $ice_propel_breadcrumbs->getSeparator();
   }

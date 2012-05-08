@@ -7,11 +7,14 @@ class IcePropelBreadcrumbs
   protected $module = null;
   protected $action = null;
   protected $breadcrumbs = array();
+  /* @var $context sfContext */
+  protected $context = null;
 
-  public function __construct($module, $action)
+  public function __construct($context, $module, $action)
   {
-    $this->module = $module;
-    $this->action = $action;
+    $this->context = $context;
+    $this->module  = $module;
+    $this->action  = $action;
 
     $this->getConfig();
     $this->buildBreadcrumbs();
@@ -21,7 +24,7 @@ class IcePropelBreadcrumbs
   {
     if ($this->config == null)
     {
-      if ($file = sfContext::getInstance()->getConfigCache()->checkConfig('config/breadcrumbs.yml', true))
+      if ($file = $this->getContext()->getConfigCache()->checkConfig('config/breadcrumbs.yml', true))
       {
         sfConfig::add(include($file));
       }
@@ -45,10 +48,10 @@ class IcePropelBreadcrumbs
 
   protected function buildBreadcrumb($item)
   {
-    $request = sfContext::getInstance()->getRequest();
-    $controller = sfContext::getInstance()->getController();
+    $request    = $this->getContext()->getRequest();
+    $controller = $this->getContext()->getController();
 
-    if (isset($item['model']) && (boolean) $item['model'] === true)
+    if (isset($item['model']) && (boolean)$item['model'] === true)
     {
       $object = $request->getAttribute('sf_route')->getObject();
 
@@ -62,23 +65,30 @@ class IcePropelBreadcrumbs
         $route_object = $object;
       }
 
-      $name = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
-      $url  = !empty($item['route']) ?
-        $controller->genUrl(array('sf_route' => $item['route'], 'sf_subject' => $route_object)) :
-        null;
+      $name  = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
+      $title = !empty($item['title']) ? preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) : $name;
+      $url   = !empty($item['route']) ?
+          $controller->genUrl(array(
+            'sf_route'   => $item['route'],
+            'sf_subject' => $route_object
+          )) :
+          null;
 
       $breadcrumb = array(
-        'name' => $name, 'url' => $url,
-        'title' => !empty($item['title']) ? $item['title'] : $name,
+        'name'  => $name,
+        'url'   => $url,
+        'title' => $title,
       );
     }
     else
     {
-      $url = isset($item['route']) ? $controller->genUrl($item['route']) : null;
+      $name  = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
+      $title = !empty($item['title']) ? preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) : $name;
+      $url        = isset($item['route']) ? $controller->genUrl($item['route']) : null;
       $breadcrumb = array(
         'name'  => $item['name'],
         'url'   => $url,
-        'title' => !empty($item['title']) ? $item['title'] : $item['name'],
+        'title' => $title,
       );
     }
 
@@ -162,6 +172,14 @@ class IcePropelBreadcrumbs
     }
 
     return $name;
+  }
+
+  /**
+   * @return \sfContext
+   */
+  public function getContext()
+  {
+    return $this->context;
   }
 
 }
