@@ -60,7 +60,6 @@ class IceSeoFilter extends sfFilter
       {
         $config = array_merge($config, $seo['_config']);
       }
-      $appendTitle = !empty($config['appendTitle']) ? $config['appendTitle'] : '';
       $title = $description = '';
       $keywords = array();
 
@@ -85,12 +84,62 @@ class IceSeoFilter extends sfFilter
 
       if ($title)
       {
-        if ($appendTitle)
+        if ($config['appendTitle'])
         {
-          $title .= $config['separator'] . $appendTitle;
+          $title .= $config['separator'] . $config['appendTitle'];
         }
         //There is SEO title set
         $response->addMeta('title', $title);
+      }
+
+      //Description
+      if (!empty($seo[$module][$action]['description']))
+      {
+        $description = $seo[$module][$action]['description'];
+        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
+        {
+          $object = $request->getAttribute('sf_route')->getObject();
+          $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
+        }
+      }
+      else if (!empty($seo[$module]['description']))
+      {
+        $description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
+      }
+      else
+      {
+        $description = '';
+      }
+
+      if ($description)
+      {
+        //There is SEO description set
+        $response->addMeta('description', $description);
+      }
+
+      //Keywords
+      if (!empty($seo[$module][$action]['keywords']))
+      {
+        $keywords = $seo[$module][$action]['keywords'];
+        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
+        {
+          $object = $request->getAttribute('sf_route')->getObject();
+          $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
+        }
+      }
+      else if (!empty($seo[$module]['keywords']))
+      {
+        $keywords = !empty($seo[$module]['keywords']) ? $seo[$module]['keywords'] : '';
+      }
+      else
+      {
+        $keywords = '';
+      }
+
+      if ($keywords)
+      {
+        //There is SEO keywords set
+        $response->addMeta('keywords', $keywords);
       }
     }
 

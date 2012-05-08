@@ -6,4 +6,6 @@ seo:
 #  collection:
 #    collectible:
 #      title: %Name%
+#      description: test description multirow with some text just for the test
+#      keywords: test, title, description, other keyword
 #      model: true
