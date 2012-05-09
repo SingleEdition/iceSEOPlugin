@@ -3,9 +3,9 @@
 class IceBreadcrumbsItem
 {
 
-  protected $text;
-  protected $uri;
-  protected $title;
+  protected
+    $text, $uri,
+    $options = array();
 
   /**
    * Constructor
@@ -18,9 +18,9 @@ class IceBreadcrumbsItem
    */
   public function __construct($text, $uri = null, array $options = array())
   {
-    $this->text  = (string)$text;
-    $this->uri   = (string)$uri;
-    $this->title = isset($options['title']) ? $options['title'] : '';
+    $this->text    = (string) $text;
+    $this->uri     = (string) $uri;
+    $this->options = $options;
   }
 
   /**
@@ -68,7 +68,7 @@ class IceBreadcrumbsItem
    */
   public function getTitle()
   {
-    return $this->title;
+    return isset($this->options['title']) ? $this->options['title'] : null ;
   }
 
   /**
@@ -78,7 +78,17 @@ class IceBreadcrumbsItem
    */
   public function setTitle($v)
   {
-    $this->title = (string)$v;
+    $this->options['title'] = (string) $v;
+  }
+
+  /**
+   * Retrieve the options of the item
+   *
+   * @return array
+   */
+  public function getOptions()
+  {
+    return $this->options;
   }
 }
 
