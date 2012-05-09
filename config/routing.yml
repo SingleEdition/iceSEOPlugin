@@ -1,0 +1,8 @@
+ice_model_meta_tag:
+  class: icePropelRouteCollection
+  options:
+    model:                iceModelMetaTag
+    module:               iceMetaTagBackendModule
+    prefix_path:          /iceMetaTags
+    column:               id
+    with_wildcard_routes: true
