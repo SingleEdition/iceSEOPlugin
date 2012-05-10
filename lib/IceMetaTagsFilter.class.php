@@ -39,6 +39,25 @@ class IceMetaTagsFilter extends sfFilter
 
       if (!$meta_tag = iceModelMetaTagPeer::doSelectOne($c))
       {
+        $c = new Criteria();
+        $c->addJoin(iceModelMetaTagPeer::ID, iceModelMetaTagI18nPeer::ID);
+        $c->add(iceModelMetaTagI18nPeer::CULTURE, $culture);
+
+        $c->add(iceModelMetaTagPeer::URL, $route);
+
+        $crit = $c->getNewCriterion(iceModelMetaTagPeer::PARAMETERS, '', Criteria::EQUAL);
+        $crit->addOr($c->getNewCriterion(iceModelMetaTagPeer::PARAMETERS, null, Criteria::ISNULL));
+
+        $c->addAnd($crit);
+      }
+
+      if (!$meta_tag = iceModelMetaTagPeer::doSelectOne($c))
+      {
+        $c = new Criteria();
+
+        $c->addJoin(iceModelMetaTagPeer::ID, iceModelMetaTagI18nPeer::ID);
+        $c->add(iceModelMetaTagI18nPeer::CULTURE, $culture);
+
         $c->add(iceModelMetaTagPeer::URL, urldecode($uri));
         $c->add(iceModelMetaTagPeer::PARAMETERS, null, Criteria::ISNULL);
 
@@ -47,9 +66,9 @@ class IceMetaTagsFilter extends sfFilter
 
       if ($meta_tag)
       {
-        $this->getContext()->getResponse()->addMeta('title', $meta_tag->getTitle($culture), true);
-        $this->getContext()->getResponse()->addMeta('description', $meta_tag->getDescription($culture), true);
-        $this->getContext()->getResponse()->addMeta('keywords', $meta_tag->getKeywords($culture), true);
+        $this->getContext()->getResponse()->addMeta('title', $meta_tag->getTitle(), true);
+        $this->getContext()->getResponse()->addMeta('description', $meta_tag->getDescription(), true);
+        $this->getContext()->getResponse()->addMeta('keywords', $meta_tag->getKeywords(), true);
       }
     }
 

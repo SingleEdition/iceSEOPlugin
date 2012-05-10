@@ -14,6 +14,6 @@ class iceModelMetaTagForm extends BaseiceModelMetaTagForm
     $this->widgetSchema['url']->setAttributes(array('style' => 'width: 500px;'));
     $this->widgetSchema['parameters']->setAttributes(array('style' => 'width: 250px;'));
 
-    $this->embedI18n(array('bg_BG', 'en_US', 'tr_TR', 'ru_RU'));
+    $this->embedI18n(array('en'));
   }
 }
