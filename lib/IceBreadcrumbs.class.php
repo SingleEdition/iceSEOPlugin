@@ -4,8 +4,8 @@ class IceBreadcrumbsItem
 {
 
   protected
-    $text, $uri,
-    $options = array();
+      $text, $uri,
+      $options = array();
 
   /**
    * Constructor
@@ -18,8 +18,8 @@ class IceBreadcrumbsItem
    */
   public function __construct($text, $uri = null, array $options = array())
   {
-    $this->text    = (string) $text;
-    $this->uri     = (string) $uri;
+    $this->text    = (string)$text;
+    $this->uri     = (string)$uri;
     $this->options = $options;
   }
 
@@ -68,7 +68,7 @@ class IceBreadcrumbsItem
    */
   public function getTitle()
   {
-    return isset($this->options['title']) ? $this->options['title'] : null ;
+    return isset($this->options['title']) ? $this->options['title'] : null;
   }
 
   /**
@@ -78,7 +78,7 @@ class IceBreadcrumbsItem
    */
   public function setTitle($v)
   {
-    $this->options['title'] = (string) $v;
+    $this->options['title'] = (string)$v;
   }
 
   /**
@@ -112,24 +112,27 @@ class IceBreadcrumbs
    * Constructor
    *
    * @param sfContext $context
+   * @param boolean $createRoot
    * @param string $title
    * @param string $route
    *
    */
-  public function __construct(sfContext $context, $title = null, $route = null)
+  public function __construct(sfContext $context, $createRoot = false, $title = null, $route = null)
   {
     $this->context = $context;
 
-    if (is_null($title))
+    if ($createRoot)
     {
-      $title = '<span class="sprites home">&nbsp;</span>';
+      if (is_null($title))
+      {
+        $title = '<span class="sprites home">&nbsp;</span>';
+      }
+      if (is_null($route))
+      {
+        $route = '@homepage';
+      }
+      $this->setRoot($title, $route);
     }
-    if (is_null($route))
-    {
-      $route = '@homepage';
-    }
-
-    $this->setRoot($title, $route);
   }
 
   /**
@@ -190,7 +193,6 @@ class IceBreadcrumbs
       {
         self::$instance = new IceBreadcrumbs($context);
         self::$instance->save();
-        self::$instance->context = $context;
       }
     }
 
@@ -238,4 +240,6 @@ class IceBreadcrumbs
   {
     return $this->context;
   }
+
+
 }

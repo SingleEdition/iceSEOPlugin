@@ -1,20 +1,19 @@
 <?php
 /**
- * @var $breadcrumbs array
+ * @var $breadcrumbs IceBreadcrumbsItem[]
  */
-
 /** @var $breadcrumbsCount integer */
 $breadcrumbsCount = count($breadcrumbs);
 
 foreach ($breadcrumbs as $key => $breadcrumb)
 {
-  if (null !== $breadcrumb['url'])
+  if ($url = $breadcrumb->getUri())
   {
-    echo link_to($breadcrumb['name'], $breadcrumb['url'], array('title'=> $breadcrumb['title']));
+    echo link_to($breadcrumb->getText(), $url, array('title'=> $breadcrumb->getTitle()));
   }
   else
   {
-    echo $breadcrumb['name'];
+    echo $breadcrumb->getText();
   }
 
   if ($key < $breadcrumbsCount - 1)

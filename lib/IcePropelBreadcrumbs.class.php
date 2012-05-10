@@ -48,6 +48,11 @@ class IcePropelBreadcrumbs
 
   protected function buildBreadcrumb($item)
   {
+    if ($item instanceof IceBreadcrumbsItem)
+    {
+      return $item;
+    }
+
     $request    = $this->getContext()->getRequest();
     $controller = $this->getContext()->getController();
 
@@ -74,25 +79,18 @@ class IcePropelBreadcrumbs
           )) :
           null;
 
-      $breadcrumb = array(
-        'name'  => $name,
-        'url'   => $url,
-        'title' => $title,
-      );
+      $breadcrumb = new IceBreadcrumbsItem($name, $url, array('title' => $title,));
     }
     else
     {
       $name  = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
       $title = !empty($item['title']) ? preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) : $name;
-      $url        = isset($item['route']) ? $controller->genUrl($item['route']) : null;
-      $breadcrumb = array(
-        'name'  => $item['name'],
-        'url'   => $url,
-        'title' => $title,
-      );
-    }
+      $url   = isset($item['route']) ? $controller->genUrl($item['route']) : null;
 
-    $breadcrumb['name'] = $this->switchCase($breadcrumb['name'], $this->getCaseForItem($item));
+      $name = $this->switchCase($name, $this->getCaseForItem($item));
+
+      $breadcrumb = new IceBreadcrumbsItem($name, $url, array('title'=> $title));
+    }
 
     return $breadcrumb;
   }
@@ -120,17 +118,21 @@ class IcePropelBreadcrumbs
       $lost = isset($this->config['_lost']) ? $this->config['_lost'] : '';
 
       $this->breadcrumbs = array(
-        array(
-          'name' => $lost,
-          'url'  => null
-        )
+        $this->buildBreadcrumb(
+          array(
+            'name' => $lost,
+            'url'  => null
+          ))
       );
     }
+
 
     if (isset($this->config['_root']))
     {
       array_unshift($this->breadcrumbs, $this->buildBreadcrumb($this->config['_root']));
     }
+
+    $this->breadcrumbs = array_merge($this->breadcrumbs, IceBreadcrumbs::getInstance($this->getContext())->getItems());
   }
 
   protected function getCaseForItem($item)
