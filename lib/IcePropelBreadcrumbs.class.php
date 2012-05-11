@@ -97,6 +97,14 @@ class IcePropelBreadcrumbs
 
   protected function buildBreadcrumbs()
   {
+    if (isset($this->config[$this->module]['_prepend']))
+    {
+      foreach ($this->config[$this->module]['_prepend'] as $item)
+      {
+        $this->breadcrumbs[] = $this->buildBreadcrumb($item);
+      }
+    }
+
     if (isset($this->config[$this->module]) && isset($this->config[$this->module][$this->action]))
     {
       $breadcrumbs_struct = $this->config[$this->module][$this->action];
