@@ -105,6 +105,7 @@ class IcePropelBreadcrumbs
       }
     }
 
+
     if (isset($this->config[$this->module]) && isset($this->config[$this->module][$this->action]))
     {
       $breadcrumbs_struct = $this->config[$this->module][$this->action];
@@ -121,10 +122,8 @@ class IcePropelBreadcrumbs
         $this->breadcrumbs[] = $this->buildBreadcrumb($item);
       }
     }
-    else
+    else if ($lost = isset($this->config['_lost']) ? $this->config['_lost'] : false)
     {
-      $lost = isset($this->config['_lost']) ? $this->config['_lost'] : '';
-
       $this->breadcrumbs = array(
         $this->buildBreadcrumb(
           array(
@@ -133,7 +132,6 @@ class IcePropelBreadcrumbs
           ))
       );
     }
-
 
     if (isset($this->config['_root']))
     {
