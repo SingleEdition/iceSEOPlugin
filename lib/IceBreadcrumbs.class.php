@@ -224,6 +224,7 @@ class IceBreadcrumbs
   public function setRoot($text, $uri)
   {
     $this->items[0] = new IceBreadcrumbsItem($text, $uri);
+    ksort($this->items, SORT_NUMERIC);
     $this->save();
   }
 
