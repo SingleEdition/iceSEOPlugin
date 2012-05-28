@@ -149,7 +149,10 @@ class IceBreadcrumbs
   {
     if ($this->read_only !== true && $this->is_full !== true)
     {
-      $this->items[] = new IceBreadcrumbsItem($text, $uri, $title);
+      // We want to make sure index "0" is only used for the Root node
+      $i = count($this->items) + 1;
+
+      $this->items[$i] = new IceBreadcrumbsItem($text, $uri, $title);
       $this->items   = array_unique($this->items);
 
       $this->save();
@@ -221,8 +224,8 @@ class IceBreadcrumbs
   public function setRoot($text, $uri)
   {
     $this->items[0] = new IceBreadcrumbsItem($text, $uri);
+    ksort($this->items, SORT_NUMERIC);
     $this->save();
-
   }
 
   /**
