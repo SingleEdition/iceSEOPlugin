@@ -8,7 +8,7 @@ $breadcrumbsCount = count($breadcrumbs);
 $index = 0;
 foreach ($breadcrumbs as $key => $breadcrumb)
 {
-  if ($url = $breadcrumb->getUri() && ++$index < $breadcrumbsCount)
+  if (($url = $breadcrumb->getUri()) && ++$index < $breadcrumbsCount)
   {
     echo link_to(
       cqStatic::reduceText($breadcrumb->getText(), 40, '[...]'),
