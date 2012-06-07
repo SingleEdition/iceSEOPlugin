@@ -49,8 +49,6 @@ class IceSeoFilter extends sfFilter
       $action = $context->getActionName();
       $config = array('appendTitle'=>'', 'separator'=>' :: ');
 
-      d($route, $routeExpanded);
-
       if ($file = $context->getConfigCache()->checkConfig('config/seo.yml', true))
       {
         sfConfig::add(include($file));
