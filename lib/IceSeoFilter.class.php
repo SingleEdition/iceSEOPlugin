@@ -60,7 +60,7 @@ class IceSeoFilter extends sfFilter
       {
         $config = array_merge($config, $seo['_config']);
       }
-      $title = $description = '';
+      $title = $meta_title = $description = '';
       $keywords = array();
 
       //Title
@@ -90,6 +90,35 @@ class IceSeoFilter extends sfFilter
         }
         //There is SEO title set
         $response->setTitle($title);
+      }
+
+      //Meta title
+      if (!empty($seo[$module][$action]['meta_title']))
+      {
+        $meta_title = $seo[$module][$action]['meta_title'];
+        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
+        {
+          $object = $request->getAttribute('sf_route')->getObject();
+          $meta_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_title);
+        }
+      }
+      else if (!empty($seo[$module]['meta_title']))
+      {
+        $meta_title = !empty($seo[$module]['meta_title']) ? $seo[$module]['meta_title'] : '';
+      }
+      else
+      {
+        $meta_title = $title;
+      }
+
+      if ($meta_title)
+      {
+        if ($config['appendTitle'])
+        {
+          $meta_title .= $config['separator'] . $config['appendTitle'];
+        }
+        //There is SEO meta name="title" set
+        $response->addMeta('title', $meta_title);
       }
 
       //Description
@@ -142,6 +171,8 @@ class IceSeoFilter extends sfFilter
         $response->addMeta('keywords', $keywords);
       }
     }
+
+    d($route, $routeExpanded, $title, $meta_title, $description, $keywords);
 
     $chain->execute();
   }
