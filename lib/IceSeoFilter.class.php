@@ -49,6 +49,8 @@ class IceSeoFilter extends sfFilter
       $action = $context->getActionName();
       $config = array('appendTitle'=>'', 'separator'=>' :: ');
 
+      d($route, $routeExpanded);
+
       if ($file = $context->getConfigCache()->checkConfig('config/seo.yml', true))
       {
         sfConfig::add(include($file));
@@ -89,7 +91,7 @@ class IceSeoFilter extends sfFilter
           $title .= $config['separator'] . $config['appendTitle'];
         }
         //There is SEO title set
-        $response->addMeta('title', $title);
+        $response->setTitle($title);
       }
 
       //Description

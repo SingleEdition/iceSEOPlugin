@@ -1,7 +1,7 @@
 seo:
   _config:
     separator: ' - '
-    appendTitle: 'CollectorsQuest'
+    appendTitle: ''
 
 #  collection:
 #    collectible:
