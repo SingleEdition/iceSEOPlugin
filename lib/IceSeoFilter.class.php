@@ -31,20 +31,21 @@ class IceSeoFilter extends sfFilter
 {
 
   /**
-   * @param $chain sfFilterChain
+   * @param $filterChain sfFilterChain
    */
-  public function execute($chain)
+  public function execute($filterChain)
   {
     if ($this->isFirstCall())
     {
+      /** @var $context sfContext */
       $context = $this->getContext();
+
       /* @var $request sfWebRequest */
       $request = $context->getRequest();
+
       /* @var $response sfWebResponse */
       $response = $context->getResponse();
-      $uri   = $request->getPathInfo();
-      $route = $context->getRouting()->getCurrentInternalUri(true);
-      $routeExpanded = $context->getRouting()->parse($context->getRouting()->getCurrentInternalUri(false));
+
       $module = $context->getModuleName();
       $action = $context->getActionName();
       $config = array('appendTitle'=>'', 'separator'=>' :: ');
@@ -63,12 +64,14 @@ class IceSeoFilter extends sfFilter
       $title = $meta_title = $description = '';
       $keywords = array();
 
-      //Title
+      // Title
       if (!empty($seo[$module][$action]['title']))
       {
         $title = $seo[$module][$action]['title'];
-        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
-        {
+        if (
+          isset($seo[$module][$action]['model']) &&
+          true === (boolean) $seo[$module][$action]
+        ) {
           $object = $request->getAttribute('sf_route')->getObject();
           $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
         }
@@ -88,7 +91,7 @@ class IceSeoFilter extends sfFilter
         {
           $title .= $config['separator'] . $config['appendTitle'];
         }
-        //There is SEO title set
+        // There is SEO title set
         $response->setTitle($title);
       }
 
@@ -96,8 +99,10 @@ class IceSeoFilter extends sfFilter
       if (!empty($seo[$module][$action]['meta_title']))
       {
         $meta_title = $seo[$module][$action]['meta_title'];
-        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
-        {
+        if (
+          isset($seo[$module][$action]['model']) &&
+          true === (boolean) $seo[$module][$action]
+        ) {
           $object = $request->getAttribute('sf_route')->getObject();
           $meta_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_title);
         }
@@ -125,8 +130,10 @@ class IceSeoFilter extends sfFilter
       if (!empty($seo[$module][$action]['description']))
       {
         $description = $seo[$module][$action]['description'];
-        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
-        {
+        if (
+          isset($seo[$module][$action]['model']) &&
+          true === (boolean) $seo[$module][$action]
+        ) {
           $object = $request->getAttribute('sf_route')->getObject();
           $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
         }
@@ -142,16 +149,18 @@ class IceSeoFilter extends sfFilter
 
       if ($description)
       {
-        //There is SEO description set
+        // There is SEO description set
         $response->addMeta('description', $description);
       }
 
-      //Keywords
+      // Keywords
       if (!empty($seo[$module][$action]['keywords']))
       {
         $keywords = $seo[$module][$action]['keywords'];
-        if (isset($seo[$module][$action]['model']) && true === (boolean)$seo[$module][$action])
-        {
+        if (
+          isset($seo[$module][$action]['model']) &&
+          true === (boolean) $seo[$module][$action]
+        ) {
           $object = $request->getAttribute('sf_route')->getObject();
           $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
         }
@@ -167,12 +176,12 @@ class IceSeoFilter extends sfFilter
 
       if ($keywords)
       {
-        //There is SEO keywords set
+        // There is SEO keywords set
         $response->addMeta('keywords', $keywords);
       }
     }
 
-    $chain->execute();
+    $filterChain->execute();
   }
 
 }
