@@ -172,8 +172,6 @@ class IceSeoFilter extends sfFilter
       }
     }
 
-    d($route, $routeExpanded, $title, $meta_title, $description, $keywords);
-
     $chain->execute();
   }
 
