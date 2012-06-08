@@ -183,8 +183,6 @@ class IceSeoFilter extends sfFilter
         // There is SEO keywords set
         $response->addMeta('keywords', $keywords);
       }
-
-      d($module, $action, $title, $description, $keywords);
     }
 
     $filterChain->execute();
