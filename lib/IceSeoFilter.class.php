@@ -73,6 +73,7 @@ class IceSeoFilter extends sfFilter
           true === (boolean) $seo[$module][$action]
         ) {
           $object = $request->getAttribute('sf_route')->getObject();
+          $title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $title);
           $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
         }
       }
@@ -104,6 +105,7 @@ class IceSeoFilter extends sfFilter
           true === (boolean) $seo[$module][$action]
         ) {
           $object = $request->getAttribute('sf_route')->getObject();
+          $meta_title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $meta_title);
           $meta_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_title);
         }
       }
@@ -135,6 +137,7 @@ class IceSeoFilter extends sfFilter
           true === (boolean) $seo[$module][$action]
         ) {
           $object = $request->getAttribute('sf_route')->getObject();
+          $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
           $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
         }
       }
@@ -162,6 +165,7 @@ class IceSeoFilter extends sfFilter
           true === (boolean) $seo[$module][$action]
         ) {
           $object = $request->getAttribute('sf_route')->getObject();
+          $keywords = preg_replace('/%count(\w+)%/e', '$object->count$1()', $keywords);
           $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
         }
       }
@@ -179,6 +183,8 @@ class IceSeoFilter extends sfFilter
         // There is SEO keywords set
         $response->addMeta('keywords', $keywords);
       }
+
+      d($module, $action, $title, $description, $keywords);
     }
 
     $filterChain->execute();
