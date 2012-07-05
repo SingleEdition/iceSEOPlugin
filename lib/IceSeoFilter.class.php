@@ -61,18 +61,24 @@ class IceSeoFilter extends sfFilter
       {
         $config = array_merge($config, $seo['_config']);
       }
-      $title = $meta_title = $description = '';
+
+      // Is it a Model Object route?
+      if (isset($seo[$module][$action]['model'])) {
+        $object = $request->getAttribute('sf_route')->getObject();
+      } else {
+        $object = null;
+      }
+
+      // Initialize some of the variables
+      $title = $meta_title = $description = null;
       $keywords = array();
 
       // Title
       if (!empty($seo[$module][$action]['title']))
       {
         $title = $seo[$module][$action]['title'];
-        if (
-          isset($seo[$module][$action]['model']) &&
-          true === (boolean) $seo[$module][$action]
-        ) {
-          $object = $request->getAttribute('sf_route')->getObject();
+        if ($object && true === (boolean) $seo[$module][$action])
+        {
           $title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $title);
           $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
         }
@@ -80,10 +86,6 @@ class IceSeoFilter extends sfFilter
       else if (!empty($seo[$module]['title']))
       {
         $title = !empty($seo[$module]['title']) ? $seo[$module]['title'] : '';
-      }
-      else
-      {
-        $title = '';
       }
 
       if ($title)
@@ -96,15 +98,12 @@ class IceSeoFilter extends sfFilter
         $response->setTitle($title);
       }
 
-      //Meta title
+      // Meta title
       if (!empty($seo[$module][$action]['meta_title']))
       {
         $meta_title = $seo[$module][$action]['meta_title'];
-        if (
-          isset($seo[$module][$action]['model']) &&
-          true === (boolean) $seo[$module][$action]
-        ) {
-          $object = $request->getAttribute('sf_route')->getObject();
+        if ($object && true === (boolean) $seo[$module][$action])
+        {
           $meta_title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $meta_title);
           $meta_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_title);
         }
@@ -132,11 +131,8 @@ class IceSeoFilter extends sfFilter
       if (!empty($seo[$module][$action]['description']))
       {
         $description = $seo[$module][$action]['description'];
-        if (
-          isset($seo[$module][$action]['model']) &&
-          true === (boolean) $seo[$module][$action]
-        ) {
-          $object = $request->getAttribute('sf_route')->getObject();
+        if ($object && true === (boolean) $seo[$module][$action])
+        {
           $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
           $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
         }
@@ -144,10 +140,6 @@ class IceSeoFilter extends sfFilter
       else if (!empty($seo[$module]['description']))
       {
         $description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
-      }
-      else
-      {
-        $description = '';
       }
 
       if ($description)
@@ -160,11 +152,8 @@ class IceSeoFilter extends sfFilter
       if (!empty($seo[$module][$action]['keywords']))
       {
         $keywords = $seo[$module][$action]['keywords'];
-        if (
-          isset($seo[$module][$action]['model']) &&
-          true === (boolean) $seo[$module][$action]
-        ) {
-          $object = $request->getAttribute('sf_route')->getObject();
+        if ($object && true === (boolean) $seo[$module][$action])
+        {
           $keywords = preg_replace('/%count(\w+)%/e', '$object->count$1()', $keywords);
           $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
         }
@@ -172,10 +161,6 @@ class IceSeoFilter extends sfFilter
       else if (!empty($seo[$module]['keywords']))
       {
         $keywords = !empty($seo[$module]['keywords']) ? $seo[$module]['keywords'] : '';
-      }
-      else
-      {
-        $keywords = '';
       }
 
       if ($keywords)
