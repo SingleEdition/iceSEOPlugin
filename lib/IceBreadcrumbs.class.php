@@ -2,10 +2,14 @@
 
 class IceBreadcrumbsItem
 {
+  /** @var string */
+  protected $text;
 
-  protected
-      $text, $uri,
-      $options = array();
+  /** @var string */
+  protected $uri;
+
+  /** @var array */
+  protected $options = array();
 
   /**
    * Constructor
@@ -18,8 +22,8 @@ class IceBreadcrumbsItem
    */
   public function __construct($text, $uri = null, array $options = array())
   {
-    $this->text    = (string)$text;
-    $this->uri     = (string)$uri;
+    $this->text    = (string) $text;
+    $this->uri     = (string) $uri;
     $this->options = $options;
   }
 
@@ -28,7 +32,7 @@ class IceBreadcrumbsItem
    */
   public function __toString()
   {
-    return (string)$this->text;
+    return (string) $this->text;
   }
 
   /**
@@ -58,7 +62,7 @@ class IceBreadcrumbsItem
    */
   public function setText($v)
   {
-    $this->text = (string)$v;
+    $this->text = (string) $v;
   }
 
   /**
@@ -78,7 +82,7 @@ class IceBreadcrumbsItem
    */
   public function setTitle($v)
   {
-    $this->options['title'] = (string)$v;
+    $this->options['title'] = (string) $v;
   }
 
   /**
@@ -152,7 +156,7 @@ class IceBreadcrumbs
       // We want to make sure index "0" is only used for the Root node
       $i = count($this->items) + 1;
 
-      $this->items[$i] = new IceBreadcrumbsItem($text, $uri, array('title'=>$title));
+      $this->items[$i] = new IceBreadcrumbsItem($text, $uri, array('title' => $title));
       $this->items   = array_unique($this->items);
 
       $this->save();

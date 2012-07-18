@@ -53,10 +53,13 @@ class IcePropelBreadcrumbs
       return $item;
     }
 
-    $request    = $this->getContext()->getRequest();
+    /** @var $request sfWebRequest */
+    $request = $this->getContext()->getRequest();
+
+    /** @var $controller sfWebController */
     $controller = $this->getContext()->getController();
 
-    if (isset($item['model']) && (boolean)$item['model'] === true)
+    if (isset($item['model']) && (boolean) $item['model'] === true)
     {
       $object = $request->getAttribute('sf_route')->getObject();
 
@@ -71,7 +74,9 @@ class IcePropelBreadcrumbs
       }
 
       $name  = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
-      $title = !empty($item['title']) ? preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) : $name;
+      $title = !empty($item['title']) ?
+        preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) :
+        $name;
       $url   = !empty($item['route']) ?
           $controller->genUrl(array(
             'sf_route'   => $item['route'],
@@ -84,7 +89,9 @@ class IcePropelBreadcrumbs
     else
     {
       $name  = preg_replace('/%(\w+)%/e', '$object->get$1()', $item['name']);
-      $title = !empty($item['title']) ? preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) : $name;
+      $title = !empty($item['title']) ?
+        preg_replace('/%(\w+)%/e', '$object->get$1()', $item['title']) :
+        $name;
       $url   = isset($item['route']) ? $controller->genUrl($item['route']) : null;
 
       $name = $this->switchCase($name, $this->getCaseForItem($item));
@@ -138,7 +145,10 @@ class IcePropelBreadcrumbs
       array_unshift($this->breadcrumbs, $this->buildBreadcrumb($this->config['_root']));
     }
 
-    $this->breadcrumbs = array_merge($this->breadcrumbs, IceBreadcrumbs::getInstance($this->getContext())->getItems());
+    $this->breadcrumbs = array_merge(
+      $this->breadcrumbs,
+      IceBreadcrumbs::getInstance($this->getContext())->getItems()
+    );
   }
 
   protected function getCaseForItem($item)

@@ -2,6 +2,9 @@
 
 class IceMetaTagsFilter extends sfFilter
 {
+  /**
+   * @param sfFilterChain $chain
+   */
   public function execute($chain)
   {
     // Execute this filter only once
@@ -66,15 +69,17 @@ class IceMetaTagsFilter extends sfFilter
 
       if ($meta_tag)
       {
-        $this->getContext()->getResponse()->addMeta('title', $meta_tag->getTitle(), true);
-        $this->getContext()->getResponse()->addMeta('description', $meta_tag->getDescription(), true);
-        $this->getContext()->getResponse()->addMeta('keywords', $meta_tag->getKeywords(), true);
+        /** @var $sf_response sfWebResponse */
+        $sf_response = $this->getContext()->getResponse();
+
+        $sf_response->addMeta('title', $meta_tag->getTitle(), true);
+        $sf_response->addMeta('description', $meta_tag->getDescription(), true);
+        $sf_response->addMeta('keywords', $meta_tag->getKeywords(), true);
       }
     }
 
     // Execute next filter
     $chain->execute();
   }
-
 
 }
