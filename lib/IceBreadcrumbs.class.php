@@ -152,7 +152,7 @@ class IceBreadcrumbs
       // We want to make sure index "0" is only used for the Root node
       $i = count($this->items) + 1;
 
-      $this->items[$i] = new IceBreadcrumbsItem($text, $uri, $title);
+      $this->items[$i] = new IceBreadcrumbsItem($text, $uri, array('title'=>$title));
       $this->items   = array_unique($this->items);
 
       $this->save();
