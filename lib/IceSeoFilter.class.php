@@ -16,17 +16,9 @@
  */
 
 /**
- * Filename: IceSeoFilter.class.php
- *
- * Put some description here
- *
  * @author Yanko Simeonoff <ysimeonoff@collectorsquest.com>
  * @since 5/8/12
- * Id: $Id$
- *
- * @todo Add tests
  */
-
 class IceSeoFilter extends sfFilter
 {
 
@@ -48,7 +40,7 @@ class IceSeoFilter extends sfFilter
 
       $module = $context->getModuleName();
       $action = $context->getActionName();
-      $config = array('appendTitle'=>'', 'separator'=>' :: ');
+      $config = array('appendTitle' => '', 'separator' => ' :: ');
 
       if ($file = $context->getConfigCache()->checkConfig('config/seo.yml', true))
       {
@@ -63,9 +55,12 @@ class IceSeoFilter extends sfFilter
       }
 
       // Is it a Model Object route?
-      if (isset($seo[$module][$action]['model'])) {
+      if (isset($seo[$module][$action]['model']))
+      {
         $object = $request->getAttribute('sf_route')->getObject();
-      } else {
+      }
+      else
+      {
         $object = null;
       }
 
@@ -88,16 +83,15 @@ class IceSeoFilter extends sfFilter
         {
           $title = array_reverse($title);
 
-          $i = sizeof($title)-1; //used to indicate the last iteration
+          $i = count($title); // indicates the last iteration
           foreach ($title as $new_title)
           {
-            if (strlen($new_title) <= 70 || $i==0)
+            if (strlen($new_title) <= 70 || --$i == 0)
             {
               //if it is the last possible option - strip title
               $title = substr($new_title, 0, 69);
               break;
             }
-            $i--;
           }
         }
       }
@@ -141,11 +135,12 @@ class IceSeoFilter extends sfFilter
         {
           $meta_title .= $config['separator'] . $config['appendTitle'];
         }
-        //There is SEO meta name="title" set
+
+        // There is SEO meta name="title" set
         $response->addMeta('title', $meta_title);
       }
 
-      //Description
+      // Description
       if (!empty($seo[$module][$action]['description']))
       {
         $description = $seo[$module][$action]['description'];
@@ -160,18 +155,18 @@ class IceSeoFilter extends sfFilter
         {
           $description = array_reverse($description);
 
-          $i = sizeof($description)-1; //used to indicate the last iteration
+          $i = count($description); // indicates the last iteration
           foreach ($description as $new_description)
           {
-            if (strlen($new_description) <= 156 || $i==0)
+            // Remove HTML tags
+            $new_description = strip_tags($new_description);
+
+            if (strlen($new_description) <= 156 || --$i == 0)
             {
-              //remove HTML tags
-              $new_description = strip_tags($new_description);
-              //if it is the last possible option - strip description
-              $description = substr($new_description, 0, 155);
+              // If it is the last possible option - strip description
+              $description = IceStatic::truncateText($new_description, 156, '...', true);
               break;
             }
-            $i--;
           }
         }
       }
