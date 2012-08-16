@@ -163,30 +163,6 @@ class IceSeoFilter extends sfFilter
           $i = sizeof($description)-1; //used to indicate the last iteration
           foreach ($description as $new_description)
           {
-            if ($object instanceof Collector)
-            {
-              // if user has no about text we want to display default info
-              $about_me = $object->getProfileAboutMe();
-              if ($about_me=='')
-              {
-                //assign default value to new description
-                $new_description = $description[sizeof($description)-1];
-                //remove HTML tags
-                $new_description = strip_tags($new_description);
-                //if it is the last possible option - strip description
-                $description = substr($new_description, 0, 155);
-                break;
-              }
-
-              // if user has a few collectibles we don't want to display them
-              $collectibles = $object->countCollectiblesInCollections();
-              if (strpos ($new_description, '' . $collectibles) && $collectibles < 25)
-              {
-                $i--;
-                continue;
-              }
-            }
-
             if (strlen($new_description) <= 156 || $i==0)
             {
               //remove HTML tags
