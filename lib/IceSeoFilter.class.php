@@ -77,10 +77,35 @@ class IceSeoFilter extends sfFilter
       if (!empty($seo[$module][$action]['title']))
       {
         $title = $seo[$module][$action]['title'];
-        if ($object && true === (boolean) $seo[$module][$action])
+
+        if (is_array($title))
         {
-          $title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $title);
-          $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
+          $title = array_reverse($title);
+
+          $i = sizeof($title)-1; //used to indicate the last iteration
+          foreach ($title as $new_title)
+          {
+            if ($object && true === (boolean) $seo[$module][$action])
+            {
+              $new_title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $new_title);
+              $new_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $new_title);
+            }
+            if (strlen($new_title) <= 70 || $i==0)
+            {
+              //if it is the last possible option - strip title
+              $title = substr($new_title, 0, 69);
+              break;
+            }
+            $i--;
+          }
+        }
+        else
+        {
+          if ($object && true === (boolean) $seo[$module][$action])
+          {
+            $title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $title);
+            $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
+          }
         }
       }
       else if (!empty($seo[$module]['title']))
@@ -131,10 +156,37 @@ class IceSeoFilter extends sfFilter
       if (!empty($seo[$module][$action]['description']))
       {
         $description = $seo[$module][$action]['description'];
-        if ($object && true === (boolean) $seo[$module][$action])
+
+        if (is_array($description))
         {
-          $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
-          $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
+          $description = array_reverse($description);
+
+          $i = sizeof($description)-1; //used to indicate the last iteration
+          foreach ($description as $new_description)
+          {
+            if ($object && true === (boolean) $seo[$module][$action])
+            {
+              $new_description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $new_description);
+              $new_description = preg_replace('/%(\w+)%/e', '$object->get$1()', $new_description);
+            }
+            if (strlen($new_description) <= 156 || $i==0)
+            {
+              //remove HTML tags
+              $new_description = strip_tags($new_description);
+              //if it is the last possible option - strip description
+              $description = substr($new_description, 0, 155);
+              break;
+            }
+            $i--;
+          }
+        }
+        else
+        {
+          if ($object && true === (boolean) $seo[$module][$action])
+          {
+            $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
+            $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
+          }
         }
       }
       else if (!empty($seo[$module]['description']))
