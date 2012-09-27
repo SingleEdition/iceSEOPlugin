@@ -86,7 +86,7 @@ class IceSeoFilter extends sfFilter
           $i = count($title); // indicates the last iteration
           foreach ($title as $new_title)
           {
-            if (strlen($new_title) <= 70 || --$i == 0)
+            if (($new_title && strlen($new_title) <= 70) || --$i == 0)
             {
               //if it is the last possible option - strip title
               $title = substr($new_title, 0, 69);
@@ -161,7 +161,7 @@ class IceSeoFilter extends sfFilter
             // Remove HTML tags
             $new_description = strip_tags($new_description);
 
-            if (strlen($new_description) <= 156 || --$i == 0)
+            if (($new_description && strlen($new_description) <= 156) || --$i == 0)
             {
               // If it is the last possible option - strip description
               $description = IceStatic::truncateText($new_description, 156, '...', true);
