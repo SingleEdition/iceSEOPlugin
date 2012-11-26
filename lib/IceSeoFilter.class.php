@@ -29,7 +29,7 @@ class IceSeoFilter extends sfFilter
   {
     if ($this->isFirstCall())
     {
-      /** @var $context sfContext */
+      /* @var $context sfContext */
       $context = $this->getContext();
 
       /* @var $request sfWebRequest */
@@ -54,10 +54,23 @@ class IceSeoFilter extends sfFilter
         $config = array_merge($config, $seo['_config']);
       }
 
+      /* @var $cache sfCache */
+      $cache = cqContext::getInstance()->getViewCacheManager()->getCache();
+      $cache_key = null;
       // Is it a Model Object route?
       if (isset($seo[$module][$action]['model']))
       {
-        $object = $request->getAttribute('sf_route')->getObject();
+        /** @var $object Collectible */
+        $object = method_exists($request->getAttribute('sf_route'), 'getObject')
+          ? $request->getAttribute('sf_route')->getObject() : null;
+        if (is_object($object))
+        {
+          $cache_key = sprintf('/objects/%s/%s/seo/', get_class($object), $object->getId());
+          if (method_exists($object, 'getCreatedAt') && (time() - strtotime($object->getCreatedAt())) < 86400)
+          {
+            $cache_key = false;
+          }
+        }
       }
       else
       {
@@ -69,35 +82,46 @@ class IceSeoFilter extends sfFilter
       $keywords = array();
 
       // Title
-      if (!empty($seo[$module][$action]['title']))
+      if ($cache_key && $data = $cache->get($cache_key . 'title'))
       {
-        $title = $seo[$module][$action]['title'];
-
-        if ($object && true === (boolean) $seo[$module][$action])
+        $title = unserialize($data);
+      }
+      else
+      {
+        if (!empty($seo[$module][$action]['title']))
         {
-          $title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $title);
-          $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
-        }
+          $title = $seo[$module][$action]['title'];
 
-        if (is_array($title))
-        {
-          $title = array_reverse($title);
-
-          $i = count($title); // indicates the last iteration
-          foreach ($title as $new_title)
+          if ($object && true === (boolean) $seo[$module][$action])
           {
-            if (($new_title && strlen($new_title) <= 70) || --$i == 0)
+            $title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $title);
+            $title = preg_replace('/%(\w+)%/e', '$object->get$1()', $title);
+          }
+
+          if (is_array($title))
+          {
+            $title = array_reverse($title);
+
+            $i = count($title); // indicates the last iteration
+            foreach ($title as $new_title)
             {
-              //if it is the last possible option - strip title
-              $title = substr($new_title, 0, 69);
-              break;
+              if (($new_title && strlen($new_title) <= 70) || --$i == 0)
+              {
+                //if it is the last possible option - strip title
+                $title = substr($new_title, 0, 69);
+                break;
+              }
             }
           }
         }
-      }
-      else if (!empty($seo[$module]['title']))
-      {
-        $title = !empty($seo[$module]['title']) ? $seo[$module]['title'] : '';
+        else if (!empty($seo[$module]['title']))
+        {
+          $title = !empty($seo[$module]['title']) ? $seo[$module]['title'] : '';
+        }
+        if ($cache_key)
+        {
+          $cache->set($cache_key . 'title', serialize($title));
+        }
       }
 
       if ($title)
@@ -111,22 +135,33 @@ class IceSeoFilter extends sfFilter
       }
 
       // Meta title
-      if (!empty($seo[$module][$action]['meta_title']))
+      if ($cache_key && $data = $cache->get($cache_key . 'meta_title'))
       {
-        $meta_title = $seo[$module][$action]['meta_title'];
-        if ($object && true === (boolean) $seo[$module][$action])
-        {
-          $meta_title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $meta_title);
-          $meta_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_title);
-        }
-      }
-      else if (!empty($seo[$module]['meta_title']))
-      {
-        $meta_title = !empty($seo[$module]['meta_title']) ? $seo[$module]['meta_title'] : '';
+        $meta_title = unserialize($data);
       }
       else
       {
-        $meta_title = $title;
+        if (!empty($seo[$module][$action]['meta_title']))
+        {
+          $meta_title = $seo[$module][$action]['meta_title'];
+          if ($object && true === (boolean) $seo[$module][$action])
+          {
+            $meta_title = preg_replace('/%count(\w+)%/e', '$object->count$1()', $meta_title);
+            $meta_title = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_title);
+          }
+        }
+        else if (!empty($seo[$module]['meta_title']))
+        {
+          $meta_title = !empty($seo[$module]['meta_title']) ? $seo[$module]['meta_title'] : '';
+        }
+        else
+        {
+          $meta_title = $title;
+        }
+        if ($cache_key)
+        {
+          $cache->set($cache_key . 'meta_title', serialize($meta_title));
+        }
       }
 
       if ($meta_title)
@@ -141,39 +176,51 @@ class IceSeoFilter extends sfFilter
       }
 
       // Description
-      if (!empty($seo[$module][$action]['description']))
+      if ($cache_key && $data = $cache->get($cache_key . 'description'))
       {
-        $description = $seo[$module][$action]['description'];
-
-        if ($object && true === (boolean) $seo[$module][$action])
+        $description = unserialize($data);
+      }
+      else
+      {
+        if (!empty($seo[$module][$action]['description']))
         {
-          $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
-          $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
-        }
+          $description = $seo[$module][$action]['description'];
 
-        if (is_array($description))
-        {
-          $description = array_reverse($description);
-
-          $i = count($description); // indicates the last iteration
-          foreach ($description as $new_description)
+          if ($object && true === (boolean) $seo[$module][$action])
           {
-            // Remove HTML tags
-            $new_description = strip_tags($new_description);
+            $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
+            $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
+          }
 
-            if (($new_description && strlen($new_description) <= 156) || --$i == 0)
+          if (is_array($description))
+          {
+            $description = array_reverse($description);
+
+            $i = count($description); // indicates the last iteration
+            foreach ($description as $new_description)
             {
-              // If it is the last possible option - strip description
-              $description = IceStatic::truncateText($new_description, 156, '...', true);
-              break;
+              // Remove HTML tags
+              $new_description = strip_tags($new_description);
+
+              if (($new_description && strlen($new_description) <= 156) || --$i == 0)
+              {
+                // If it is the last possible option - strip description
+                $description = IceStatic::truncateText($new_description, 156, '...', true);
+                break;
+              }
             }
           }
         }
+        else if (!empty($seo[$module]['description']))
+        {
+          $description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
+        }
+        if ($cache_key)
+        {
+          $cache->set($cache_key . 'description', serialize($description));
+        }
       }
-      else if (!empty($seo[$module]['description']))
-      {
-        $description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
-      }
+
 
       if ($description)
       {
@@ -182,18 +229,29 @@ class IceSeoFilter extends sfFilter
       }
 
       // Keywords
-      if (!empty($seo[$module][$action]['keywords']))
+      if ($cache_key && $data = $cache->get($cache_key . 'keywords'))
       {
-        $keywords = $seo[$module][$action]['keywords'];
-        if ($object && true === (boolean) $seo[$module][$action])
-        {
-          $keywords = preg_replace('/%count(\w+)%/e', '$object->count$1()', $keywords);
-          $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
-        }
+        $keywords = unserialize($data);
       }
-      else if (!empty($seo[$module]['keywords']))
+      else
       {
-        $keywords = !empty($seo[$module]['keywords']) ? $seo[$module]['keywords'] : '';
+        if (!empty($seo[$module][$action]['keywords']))
+        {
+          $keywords = $seo[$module][$action]['keywords'];
+          if ($object && true === (boolean) $seo[$module][$action])
+          {
+            $keywords = preg_replace('/%count(\w+)%/e', '$object->count$1()', $keywords);
+            $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
+          }
+        }
+        else if (!empty($seo[$module]['keywords']))
+        {
+          $keywords = !empty($seo[$module]['keywords']) ? $seo[$module]['keywords'] : '';
+        }
+        if ($cache_key)
+        {
+          $cache->set($cache_key . 'keywords', serialize($keywords));
+        }
       }
 
       if ($keywords)
