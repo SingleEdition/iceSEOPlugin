@@ -55,7 +55,9 @@ class IceSeoFilter extends sfFilter
       }
 
       /* @var $cache sfCache */
-      $cache = cqContext::getInstance()->getViewCacheManager()->getCache();
+      $cache = cqContext::getInstance()->getViewCacheManager()
+        ? cqContext::getInstance()->getViewCacheManager()->getCache()
+        : new sfNoCache();
       $cache_key = null;
       // Is it a Model Object route?
       if (isset($seo[$module][$action]['model']))
@@ -82,7 +84,7 @@ class IceSeoFilter extends sfFilter
       $keywords = array();
 
       // Title
-      if ($cache_key && $data = $cache->get($cache_key . 'title'))
+      if ($cache_key && ($data = $cache->get($cache_key . 'title')))
       {
         $title = unserialize($data);
       }
@@ -135,7 +137,7 @@ class IceSeoFilter extends sfFilter
       }
 
       // Meta title
-      if ($cache_key && $data = $cache->get($cache_key . 'meta_title'))
+      if ($cache_key && ($data = $cache->get($cache_key . 'meta_title')))
       {
         $meta_title = unserialize($data);
       }
@@ -176,7 +178,7 @@ class IceSeoFilter extends sfFilter
       }
 
       // Description
-      if ($cache_key && $data = $cache->get($cache_key . 'description'))
+      if ($cache_key && ($data = $cache->get($cache_key . 'description')))
       {
         $description = unserialize($data);
       }
@@ -229,7 +231,7 @@ class IceSeoFilter extends sfFilter
       }
 
       // Keywords
-      if ($cache_key && $data = $cache->get($cache_key . 'keywords'))
+      if ($cache_key && ($data = $cache->get($cache_key . 'keywords')))
       {
         $keywords = unserialize($data);
       }
