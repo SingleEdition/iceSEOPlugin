@@ -58,7 +58,10 @@ class IceSeoFilter extends sfFilter
       $cache = cqContext::getInstance()->getViewCacheManager()
         ? cqContext::getInstance()->getViewCacheManager()->getCache()
         : new sfNoCache();
+
+      // Initialize the cache key
       $cache_key = null;
+
       // Is it a Model Object route?
       if (isset($seo[$module][$action]['model']))
       {
@@ -80,15 +83,10 @@ class IceSeoFilter extends sfFilter
       }
 
       // Initialize some of the variables
-      $title = $meta_title = $description = null;
-      $keywords = array();
+      $title = $meta_title = $meta_description = $meta_keywords = array();
 
       // Title
-      if ($cache_key && ($data = $cache->get($cache_key . 'title')))
-      {
-        $title = unserialize($data);
-      }
-      else
+      if (!$cache_key || !($title = $cache->get($cache_key . 'title')))
       {
         if (!empty($seo[$module][$action]['title']))
         {
@@ -120,9 +118,13 @@ class IceSeoFilter extends sfFilter
         {
           $title = !empty($seo[$module]['title']) ? $seo[$module]['title'] : '';
         }
-        if ($cache_key)
+
+        /**
+         * Cache the page Title
+         */
+        if ($cache_key && !empty($title))
         {
-          $cache->set($cache_key . 'title', serialize($title));
+          $cache->set($cache_key . 'title', $title);
         }
       }
 
@@ -137,11 +139,7 @@ class IceSeoFilter extends sfFilter
       }
 
       // Meta title
-      if ($cache_key && ($data = $cache->get($cache_key . 'meta_title')))
-      {
-        $meta_title = unserialize($data);
-      }
-      else
+      if (!$cache_key || !($meta_title = $cache->get($cache_key . 'meta_title')))
       {
         if (!empty($seo[$module][$action]['meta_title']))
         {
@@ -160,9 +158,13 @@ class IceSeoFilter extends sfFilter
         {
           $meta_title = $title;
         }
+
+        /**
+         * Cache the Meta Title
+         */
         if ($cache_key)
         {
-          $cache->set($cache_key . 'meta_title', serialize($meta_title));
+          $cache->set($cache_key . 'meta_title', $meta_title, 86400);
         }
       }
 
@@ -178,28 +180,24 @@ class IceSeoFilter extends sfFilter
       }
 
       // Description
-      if ($cache_key && ($data = $cache->get($cache_key . 'description')))
-      {
-        $description = unserialize($data);
-      }
-      else
+      if (!$cache_key || !($meta_description = $cache->get($cache_key . 'meta_description')))
       {
         if (!empty($seo[$module][$action]['description']))
         {
-          $description = $seo[$module][$action]['description'];
+          $meta_description = $seo[$module][$action]['description'];
 
           if ($object && true === (boolean) $seo[$module][$action])
           {
-            $description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $description);
-            $description = preg_replace('/%(\w+)%/e', '$object->get$1()', $description);
+            $meta_description = preg_replace('/%count(\w+)%/e', '$object->count$1()', $meta_description);
+            $meta_description = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_description);
           }
 
-          if (is_array($description))
+          if (is_array($meta_description))
           {
-            $description = array_reverse($description);
+            $meta_description = array_reverse($meta_description);
 
-            $i = count($description); // indicates the last iteration
-            foreach ($description as $new_description)
+            $i = count($meta_description); // indicates the last iteration
+            foreach ($meta_description as $new_description)
             {
               // Remove HTML tags
               $new_description = strip_tags($new_description);
@@ -207,7 +205,7 @@ class IceSeoFilter extends sfFilter
               if (($new_description && strlen($new_description) <= 156) || --$i == 0)
               {
                 // If it is the last possible option - strip description
-                $description = IceStatic::truncateText($new_description, 156, '...', true);
+                $meta_description = IceStatic::truncateText($new_description, 156, '...', true);
                 break;
               }
             }
@@ -215,51 +213,52 @@ class IceSeoFilter extends sfFilter
         }
         else if (!empty($seo[$module]['description']))
         {
-          $description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
+          $meta_description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
         }
-        if ($cache_key)
+
+        if ($cache_key && !empty($meta_description))
         {
-          $cache->set($cache_key . 'description', serialize($description));
+          $cache->set($cache_key . 'meta_description', $meta_description, 86400);
         }
       }
 
 
-      if ($description)
+      if (!empty($meta_description))
       {
         // There is SEO description set
-        $response->addMeta('description', $description);
+        $response->addMeta('description', $meta_description);
       }
 
       // Keywords
-      if ($cache_key && ($data = $cache->get($cache_key . 'keywords')))
-      {
-        $keywords = unserialize($data);
-      }
-      else
+      if (!$cache_key || !($meta_keywords = $cache->get($cache_key . 'meta_keywords')))
       {
         if (!empty($seo[$module][$action]['keywords']))
         {
-          $keywords = $seo[$module][$action]['keywords'];
+          $meta_keywords = $seo[$module][$action]['keywords'];
           if ($object && true === (boolean) $seo[$module][$action])
           {
-            $keywords = preg_replace('/%count(\w+)%/e', '$object->count$1()', $keywords);
-            $keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $keywords);
+            $meta_keywords = preg_replace('/%count(\w+)%/e', '$object->count$1()', $meta_keywords);
+            $meta_keywords = preg_replace('/%(\w+)%/e', '$object->get$1()', $meta_keywords);
           }
         }
         else if (!empty($seo[$module]['keywords']))
         {
-          $keywords = !empty($seo[$module]['keywords']) ? $seo[$module]['keywords'] : '';
+          $meta_keywords = !empty($seo[$module]['keywords']) ? $seo[$module]['keywords'] : '';
         }
-        if ($cache_key)
+
+        /**
+         * Cache the Meta Keywords
+         */
+        if ($cache_key && !empty($meta_keywords))
         {
-          $cache->set($cache_key . 'keywords', serialize($keywords));
+          $cache->set($cache_key . 'meta_keywords', $meta_keywords, 86400);
         }
       }
 
-      if ($keywords)
+      if (!empty($meta_keywords))
       {
         // There is SEO keywords set
-        $response->addMeta('keywords', $keywords);
+        $response->addMeta('keywords', $meta_keywords);
       }
     }
 
