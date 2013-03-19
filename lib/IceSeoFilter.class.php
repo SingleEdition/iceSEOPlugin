@@ -55,8 +55,8 @@ class IceSeoFilter extends sfFilter
       }
 
       /* @var $cache sfCache */
-      $cache = cqContext::getInstance()->getViewCacheManager()
-        ? cqContext::getInstance()->getViewCacheManager()->getCache()
+      $cache = sfContext::getInstance()->getViewCacheManager()
+        ? sfContext::getInstance()->getViewCacheManager()->getCache()
         : new sfNoCache();
 
       // Initialize the cache key
