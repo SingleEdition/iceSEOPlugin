@@ -3,7 +3,9 @@ config/breadcrumbs.yml:
   param:
     prefix: ice_breadcrumbs_
 
-config/seo.yml:
+config/seo_1.yml:
+  class: sfSimpleYamlConfigHandler
+config/seo_2.yml:
   class: sfSimpleYamlConfigHandler
 
 #modules/*/config/breadcrumbs.yml:

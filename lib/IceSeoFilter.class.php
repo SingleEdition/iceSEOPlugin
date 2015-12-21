@@ -42,7 +42,7 @@ class IceSeoFilter extends sfFilter
       $action = $context->getActionName();
       $config = array('appendTitle' => '', 'separator' => ' :: ');
 
-      if ($file = $context->getConfigCache()->checkConfig('config/seo.yml', true))
+      if ($file = $context->getConfigCache()->checkConfig('config/seo_' . sfConfig::get('app_site_id')  . '.yml', true))
       {
         sfConfig::add(include($file));
       }
@@ -117,6 +117,10 @@ class IceSeoFilter extends sfFilter
         else if (!empty($seo[$module]['title']))
         {
           $title = !empty($seo[$module]['title']) ? $seo[$module]['title'] : '';
+        }
+        else if (!empty($seo['global']['index']['title']))
+        {
+          $title = !empty($seo['global']['index']['title']) ? $seo['global']['index']['title'] : '';
         }
 
         /**
@@ -215,13 +219,16 @@ class IceSeoFilter extends sfFilter
         {
           $meta_description = !empty($seo[$module]['description']) ? $seo[$module]['description'] : '';
         }
+        else if (!empty($seo['global']['index']['description']))
+        {
+          $meta_description = $seo['global']['index']['description'];
+        }
 
         if ($cache_key && !empty($meta_description))
         {
           $cache->set($cache_key . 'meta_description', $meta_description, 86400);
         }
       }
-
 
       if (!empty($meta_description))
       {
